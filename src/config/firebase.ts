@@ -5,7 +5,7 @@ import path from 'path';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const servicePath = "C:/Users/DELL/Documents/backend-application-ecommerce/serviceAccountKey.json";
+const servicePath = "C:/Users/DELL/Documents/backend-application-ecommerce/firebase.json";
 
 function loadServiceAccount() {
   try {
