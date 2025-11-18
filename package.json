@@ -8,7 +8,9 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "jest --coverage",
-    "lint": "eslint . --ext .ts"
+    "test:unit": "jest --runInBand --testPathPatterns=tests/unit",
+    "lint": "eslint . --ext .ts",
+    "test:integration": "cross-env USE_REAL_FIREBASE=true EMAIL_DISABLED=true jest --runInBand --testPathPatterns=tests/integration"
   },
   "repository": {
     "type": "git",
@@ -29,14 +31,18 @@
     "firebase-admin": "^13.6.0",
     "helmet": "^8.1.0",
     "joi": "^18.0.1",
+    "nodemailer": "^7.0.10",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/nodemailer": "^7.0.3",
     "@types/supertest": "^6.0.3",
     "@types/swagger-ui-express": "^4.1.8",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "jest": "^30.2.0",
     "supertest": "^7.1.4",
