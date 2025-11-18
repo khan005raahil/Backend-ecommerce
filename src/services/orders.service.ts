@@ -1,4 +1,4 @@
-// src/services/orders.service.ts
+
 import OrdersRepo from '../repositories/orders.repo';
 import CustomersRepo from '../repositories/customers.repo';
 import ProductsRepo from '../repositories/products.repo';
@@ -46,23 +46,18 @@ export type OrderSummaryForEmail = {
 };
 
 export class OrdersService {
-  /**
-   * Create an order, save to DB, then send confirmation email (non-blocking)
-   */
+
   static async createOrder(
     customerId: string,
     items: OrderItemInput[],
     shipping: any,
     paymentMethod: string
   ): Promise<OrderSaved> {
-    // 1) Get customer details
     const customer = await CustomersRepo.getById(customerId);
     if (!customer) throw new Error('Customer not found');
 
-    // cast customer to any to access flexible fields safely
     const c: any = customer;
 
-    // 2) Build detailed items
     const orderItemsDetailed: OrderItemDetailed[] = await Promise.all(
       items.map(async (it) => {
         const p = await ProductsRepo.getById(it.productId);
@@ -81,13 +76,11 @@ export class OrdersService {
       })
     );
 
-    // 3) Compute totals
     const subtotal = orderItemsDetailed.reduce((sum, item) => sum + item.lineTotal, 0);
     const tax = Number((subtotal * 0.05).toFixed(2));
     const shippingCost = shipping?.cost || 0;
     const total = Number((subtotal + tax + shippingCost).toFixed(2));
 
-    // 4) Prepare order object (note: shipping object kept separately from shippingCost)
     const orderToSave = {
       customerId,
       orderItems: orderItemsDetailed,
@@ -102,10 +95,8 @@ export class OrdersService {
       updatedAt: new Date().toISOString(),
     };
 
-    // 5) Save - cast to OrderSaved (repo may return a plain object)
     const saved = (await OrdersRepo.create(orderToSave)) as OrderSaved;
 
-    // 6) Email summary - use c (any) to avoid missing-property TS errors
     const customerName =
       c.name ||
       `${(c.firstName || '')} ${(c.lastName || '')}`.trim() ||
@@ -125,7 +116,6 @@ export class OrdersService {
       status: saved.status || 'processing',
     };
 
-    // 7) Send confirmation email (non-blocking). Cast EmailService to any if typings missing.
     (EmailService as any).sendOrderConfirmation(orderSummary).catch((err: any) => {
       console.error('Email send failed for order', saved.id, err);
     });
@@ -133,9 +123,6 @@ export class OrdersService {
     return saved;
   }
 
-  /**
-   * Update status of an order + send email notification
-   */
   static async updateOrderStatus(orderId: string, newStatus: string): Promise<OrderSaved> {
     const updated = (await OrdersRepo.update(orderId, {
       status: newStatus,
@@ -166,17 +153,13 @@ export class OrdersService {
     return updated;
   }
 
-  /**
-   * List all orders with optional query filters
-   */
+
   static async listOrders(query: any = {}): Promise<OrderSaved[]> {
     const list = await OrdersRepo.list(query);
     return (list as any) as OrderSaved[];
   }
 
-  /**
-   * Get a single order by ID
-   */
+
   static async getOrder(id: string): Promise<OrderSaved | null> {
     const order = await OrdersRepo.getById(id);
     return (order as any) || null;

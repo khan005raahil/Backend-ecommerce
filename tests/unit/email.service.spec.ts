@@ -1,4 +1,3 @@
-// tests/unit/email.service.spec.ts
 jest.mock('nodemailer');
 
 import nodemailer from 'nodemailer';
@@ -16,10 +15,9 @@ describe('EmailService', () => {
     const sample = '<p>{{greet}} {{name}}</p>';
     const tmp = path.join(__dirname, '..', 'tmp-template.html');
     require('fs').writeFileSync(tmp, sample, 'utf8');
-    // temporarily point to template file by calling loadTemplate directly:
-    // (we'll simulate by reading and replacing)
+
     const html = EmailService['loadTemplate']('order-status.html', { orderId: '1', customerName: 'A', status: 'done', total: '10' });
-    // function should return string (even if template exists or not)
+  
     expect(typeof html).toBe('string');
     // cleanup
     try { fs.unlinkSync(tmp); } catch {}
